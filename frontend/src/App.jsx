@@ -11,8 +11,6 @@ function App() {
     const tg = window.Telegram?.WebApp;
     const user = tg?.initDataUnsafe?.user;
 
-    console.log("Telegram WebApp:", window.Telegram?.WebApp);
-
     if (user) {
       console.log("Telegram user:", user);
       saveUser({

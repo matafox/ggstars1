@@ -23,11 +23,13 @@ app.get("/api/ping", (req, res) => {
 });
 
 app.post("/api/users", async (req, res) => {
-  const { telegram_id, username, first_name, last_name } = req.body;
+  console.log("=== POST /api/users called ===");
   console.log("Received user data:", req.body);
 
+  const { telegram_id, username, first_name, last_name } = req.body;
+
   if (!telegram_id) {
-    console.error("No telegram_id provided!");
+    console.error("❌ No telegram_id provided!");
     return res.status(400).json({ error: "Missing telegram_id" });
   }
 
@@ -44,14 +46,14 @@ app.post("/api/users", async (req, res) => {
       `,
       [telegram_id, username, first_name, last_name]
     );
-    console.log("User saved:", result.rows[0]);
+    console.log("✅ User saved or updated:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Insert error:", err.message);
+    console.error("❌ Insert error:", err.message);
     res.status(500).json({ error: "User insert error", details: err.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Backend is running on port ${PORT}`);
+  console.log(`✅ Backend is running on port ${PORT}`);
 });
