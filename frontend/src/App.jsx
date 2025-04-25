@@ -6,8 +6,6 @@ function App() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    console.log("API URL:", import.meta.env.VITE_API_URL);
-
     getPing().then(data => setMsg(data.message));
 
     const tg = window.Telegram?.WebApp;
