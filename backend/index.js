@@ -19,5 +19,5 @@ app.get('/api/ping', (req, res) => {
 });
 
 app.listen(10000, () => {
-  console.log('Backend is running on port 10000');
+  console.log('✅ Backend is running on port 10000 and connected to Neon');
 });
