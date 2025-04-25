@@ -21,3 +21,8 @@ app.get('/api/ping', (req, res) => {
 app.listen(10000, () => {
   console.log('✅ Backend is running on port 10000 and connected to Neon');
 });
+
+.catch((err) => {
+  console.error("Insert error:", err);
+  res.status(500).send("Failed to save user");
+});
