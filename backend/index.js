@@ -19,6 +19,12 @@ app.get('/api/ping', (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   const { telegram_id, username, first_name, last_name } = req.body;
+  console.log("Received user data:", req.body);
+
+  if (!telegram_id) {
+    return res.status(400).json({ error: 'Missing telegram_id' });
+  }
+
   try {
     const result = await pool.query(`
       INSERT INTO ggusers (telegram_id, username, first_name, last_name)
@@ -31,8 +37,8 @@ app.post('/api/users', async (req, res) => {
     `, [telegram_id, username, first_name, last_name]);
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'User insert error' });
+    console.error("Insert error:", err);
+    res.status(500).json({ error: 'User insert error', details: err.message });
   }
 });
 
