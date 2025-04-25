@@ -20,7 +20,7 @@ app.get('/api/ping', (req, res) => {
 app.post('/api/users', async (req, res) => {
   const { telegram_id, username, first_name, last_name } = req.body;
   try {
-    const result = await pool.query(\`
+    const result = await pool.query(`
       INSERT INTO ggusers (telegram_id, username, first_name, last_name)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (telegram_id) DO UPDATE
@@ -28,7 +28,7 @@ app.post('/api/users', async (req, res) => {
           first_name = EXCLUDED.first_name,
           last_name = EXCLUDED.last_name
       RETURNING *;
-    \`, [telegram_id, username, first_name, last_name]);
+    `, [telegram_id, username, first_name, last_name]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
