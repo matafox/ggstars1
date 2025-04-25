@@ -33,7 +33,7 @@ app.post("/api/users", async (req, res) => {
 
   try {
     const result = await pool.query(
-      \`
+      `
       INSERT INTO ggusers (telegram_id, username, first_name, last_name)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (telegram_id) DO UPDATE
@@ -41,7 +41,7 @@ app.post("/api/users", async (req, res) => {
           first_name = EXCLUDED.first_name,
           last_name = EXCLUDED.last_name
       RETURNING *;
-      \`,
+      `,
       [telegram_id, username, first_name, last_name]
     );
     console.log("User saved:", result.rows[0]);
