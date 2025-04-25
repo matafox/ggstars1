@@ -6,22 +6,22 @@ function App() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe.user;
+    getPing().then(data => setMsg(data.message));
 
-    if (user) {
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+      const user = window.Telegram.WebApp.initDataUnsafe.user;
       saveUser({
         telegram_id: user.id,
         username: user.username,
         first_name: user.first_name,
         last_name: user.last_name
       });
+    } else {
+      console.warn("Telegram WebApp not detected.");
     }
-
-    getPing().then(data => setMsg(data.message));
   }, []);
 
-  return <h1>Server says: {msg}</h1>;
+  return <h1>{msg || "Waiting for Telegram WebApp..."}</h1>;
 }
 
 export default App;
