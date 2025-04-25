@@ -5,6 +5,7 @@ export const getPing = async () => {
 };
 
 export const saveUser = async (userData) => {
+  console.log("Sending user to backend:", userData);
   await fetch(`${import.meta.env.VITE_API_URL}/users`, {
     method: 'POST',
     headers: {
