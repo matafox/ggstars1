@@ -8,18 +8,22 @@ function App() {
   useEffect(() => {
     getPing().then(data => setMsg(data.message));
 
-    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-      const user = window.Telegram.WebApp.initDataUnsafe.user;
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+
+    if (user) {
+      console.log("Telegram user:", user);
       saveUser({
         telegram_id: user.id,
         username: user.username,
         first_name: user.first_name,
         last_name: user.last_name
-      }).catch(() => {
+      }).catch((err) => {
         alert("Не вдалося авторизувати користувача через Telegram.");
+        console.error("Save user failed:", err);
       });
     } else {
-      console.warn("Telegram WebApp not detected.");
+      console.warn("Telegram WebApp not detected or no user data.");
     }
   }, []);
 
