@@ -1,41 +1,32 @@
 
-import express from "express";
-import cors from "cors";
-import pkg from "pg";
-import dotenv from "dotenv";
-dotenv.config();
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-const { Pool } = pkg;
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/ping", (req, res) => {
-  res.json({ message: "pong" });
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
 });
 
-app.post("/api/users", async (req, res) => {
-  console.log("=== POST /api/users called ===");
+app.post('/api/users', async (req, res) => {
+  const { telegram_id, username, first_name, last_name } = req.body;
   console.log("Received user data:", req.body);
 
-  const { telegram_id, username, first_name, last_name } = req.body;
-
   if (!telegram_id) {
-    console.error("❌ No telegram_id provided!");
-    return res.status(400).json({ error: "Missing telegram_id" });
+    return res.status(400).json({ error: 'Missing telegram_id' });
   }
 
   try {
-    const result = await pool.query(
-      `
+    const result = await pool.query(`
       INSERT INTO ggusers (telegram_id, username, first_name, last_name)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (telegram_id) DO UPDATE
@@ -43,17 +34,14 @@ app.post("/api/users", async (req, res) => {
           first_name = EXCLUDED.first_name,
           last_name = EXCLUDED.last_name
       RETURNING *;
-      `,
-      [telegram_id, username, first_name, last_name]
-    );
-    console.log("✅ User saved or updated:", result.rows[0]);
+    `, [telegram_id, username, first_name, last_name]);
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("❌ Insert error:", err.message);
-    res.status(500).json({ error: "User insert error", details: err.message });
+    console.error("Insert error:", err);
+    res.status(500).json({ error: 'User insert error', details: err.message });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Backend is running on port ${PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+  console.log('Backend is running');
 });

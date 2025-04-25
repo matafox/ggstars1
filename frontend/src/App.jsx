@@ -1,44 +1,70 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { saveUser, getPing } from "./api";
 
+const ADMIN_ID = 315343752; // Павло - адмін
 const API_URL = import.meta.env.VITE_API_URL;
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp;
 
 function App() {
+  const [msg, setMsg] = useState('');
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminAction, setAdminAction] = useState('');
+
   useEffect(() => {
     console.log("=== useEffect started ===");
+    console.log("API URL:", API_URL);
+
+    getPing().then(data => setMsg(data.message));
 
     if (!tg?.initDataUnsafe?.user) {
       console.warn("Telegram WebApp not detected or no user data.");
       return;
     }
 
-    const user = tg.initDataUnsafe.user;
-    console.log("Telegram user:", user);
+    const tgUser = tg.initDataUnsafe.user;
+    console.log("Telegram user:", tgUser);
+    setUser(tgUser);
 
-    fetch(`${API_URL}/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        telegram_id: user.id,
-        username: user.username,
-        first_name: user.first_name,
-        last_name: user.last_name,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("✅ User saved:", data);
-      })
-      .catch((err) => {
-        console.error("❌ Error saving user:", err.message);
-      });
+    if (tgUser.id === ADMIN_ID) {
+      setIsAdmin(true);
+    }
+
+    saveUser({
+      telegram_id: tgUser.id,
+      username: tgUser.username,
+      first_name: tgUser.first_name,
+      last_name: tgUser.last_name
+    }).catch((err) => {
+      console.error("Save user failed:", err);
+    });
   }, []);
+
+  const handleAction = (action) => {
+    setAdminAction(action);
+    console.log("Admin action:", action);
+  };
 
   return (
     <div style={{ background: "#222", color: "#fff", padding: "2rem" }}>
       <h1>GGStars</h1>
-      <p>Telegram WebApp debug</p>
+      <p>{msg || "Waiting for Telegram WebApp..."}</p>
+
+      {isAdmin && (
+        <div style={{ marginTop: "2rem" }}>
+          <h2>Адмін панель</h2>
+          <button onClick={() => handleAction('view_users')}>Перегляд всіх юзерів</button>
+          <button onClick={() => handleAction('add_bonus')} style={{ marginLeft: "10px" }}>Додавання бонусу</button>
+          <button onClick={() => handleAction('stats')} style={{ marginLeft: "10px" }}>Статистика</button>
+
+          {adminAction && (
+            <div style={{ marginTop: "1rem", background: "#333", padding: "1rem" }}>
+              <strong>Вибрана дія:</strong> {adminAction}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
