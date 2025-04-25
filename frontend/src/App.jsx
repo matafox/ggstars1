@@ -1,33 +1,46 @@
 
-import { useEffect, useState } from 'react';
-import { saveUser, getPing } from './api';
+import { useEffect } from "react";
+
+const API_URL = import.meta.env.VITE_API_URL;
+const tg = window.Telegram.WebApp;
 
 function App() {
-  const [msg, setMsg] = useState('');
-
   useEffect(() => {
-    getPing().then(data => setMsg(data.message));
+    console.log("=== useEffect started ===");
 
-    const tg = window.Telegram?.WebApp;
-    const user = tg?.initDataUnsafe?.user;
+    if (!tg?.initDataUnsafe?.user) {
+      console.warn("Telegram WebApp not detected or no user data.");
+      return;
+    }
 
-    if (user) {
-      console.log("Telegram user:", user);
-      saveUser({
+    const user = tg.initDataUnsafe.user;
+    console.log("Telegram user:", user);
+
+    fetch(`${API_URL}/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         telegram_id: user.id,
         username: user.username,
         first_name: user.first_name,
-        last_name: user.last_name
-      }).catch((err) => {
-        alert("Не вдалося авторизувати користувача через Telegram.");
-        console.error("Save user failed:", err);
+        last_name: user.last_name,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ User saved:", data);
+      })
+      .catch((err) => {
+        console.error("❌ Error saving user:", err.message);
       });
-    } else {
-      console.warn("Telegram WebApp not detected or no user data.");
-    }
   }, []);
 
-  return <h1>{msg || "Waiting for Telegram WebApp..."}</h1>;
+  return (
+    <div style={{ background: "#222", color: "#fff", padding: "2rem" }}>
+      <h1>GGStars</h1>
+      <p>Telegram WebApp debug</p>
+    </div>
+  );
 }
 
 export default App;
