@@ -1,56 +1,27 @@
-import express from "express";
-import cors from "cors";
-import pg from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
-
+const express = require('express');
+const fetch = require('node-fetch'); // додати node-fetch (npm install node-fetch)
 const app = express();
-const port = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
+// Інші налаштування (cors, bodyParser, db)
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
-app.get("/", (req, res) => {
-  res.send("pong");
-});
-
-app.post("/api/save-user", async (req, res) => {
+// Додаємо новий роут для матчів
+app.get('/api/matches', async (req, res) => {
   try {
-    const { telegram_id, username, first_name, last_name, referral_code, referred_by } = req.body;
-
-    const result = await pool.query(
-      `INSERT INTO ggusers (telegram_id, username, first_name, last_name, referral_code, referred_by)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (telegram_id) DO UPDATE SET username = $2, first_name = $3, last_name = $4
-       RETURNING *`,
-      [telegram_id, username, first_name, last_name, referral_code, referred_by]
-    );
-
-    const row = result.rows[0];
-
-    res.json({
-      telegram_id: row.telegram_id,
-      username: row.username,
-      first_name: row.first_name,
-      last_name: row.last_name,
-      referral_code: row.referral_code,
-      referred_by: row.referred_by,
-      is_admin: row.is_admin
+    const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
+      headers: {
+        Authorization: `Bearer ${process.env.PANDASCORE_API_TOKEN}`,
+      },
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to save user" });
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+    res.status(500).json({ error: 'Failed to fetch matches' });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Твій сервер
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`Backend is running on port ${PORT}`);
 });
