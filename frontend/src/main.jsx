@@ -25,7 +25,7 @@ window.onload = async () => {
       <div id="matches-slider" style="display: flex; overflow-x: auto; gap: 10px; padding: 20px;">
         ${matches.map(m => `
           <div style="background: #333; padding: 15px; border-radius: 10px; min-width: 200px; color: white;">
-            <div><strong>${m.opponents?.[0]?.opponent?.name⠞⠺⠺⠺⠺⠟⠺⠺⠵⠵⠺⠟⠺⠟⠟⠞⠞⠵⠵⠵⠵⠺⠞⠟⠵⠵⠵⠟⠞⠞⠟⠞⠵⠵⠵⠞⠺⠟⠵⠵⠺⠟⠺⠵⠞⠟⠟⠵'TBD'}</strong></div>
+            <div><strong>${m.opponents?.[0]?.opponent?.name  'TBD'} vs ${m.opponents?.[1]?.opponent?.name  'TBD'}</strong></div>
             <div>${m.begin_at ? new Date(m.begin_at).toLocaleString() : 'Date unknown'}</div>
           </div>
         `).join('')}
