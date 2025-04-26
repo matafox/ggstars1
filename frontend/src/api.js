@@ -1,14 +1,17 @@
-export async function getMatches() {
-  const response = await fetch("https://api.pandascore.co/matches/upcoming", {
+const API_URL = import.meta.env.VITE_API_URL;
+
+export async function saveUserData(userData) {
+  const response = await fetch(`${API_URL}/save-user`, {
+    method: 'POST',
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_PANDASCORE_API_TOKEN}`
-    }
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch matches');
+    throw new Error('Failed to save user.');
   }
 
-  const data = await response.json();
-  return data;
+  return await response.json();
 }
