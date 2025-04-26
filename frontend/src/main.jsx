@@ -42,7 +42,7 @@ function App() {
           <div key={index} className="match-card">
             <div className="teams">
               <strong>
-                {(m.opponents?.[0]?.opponent?.name  'TBD')} vs {(m.opponents?.[1]?.opponent?.name  'TBD')}
+                {(m.opponents?.[0]?.opponent?.name  'TBD')} vs {(m.opponents?.[1]?.opponent?.name || 'TBD')}
               </strong>
             </div>
             <div className="time">
