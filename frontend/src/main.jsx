@@ -1,85 +1,57 @@
 import { getMatches } from './api';
 
-// Показати прелоадер
-document.getElementById('app').innerHTML = <div class="preloader">Loading...</div>;
+window.onload = async () => {
+  const app = document.getElementById('app');
 
-// Після завантаження Telegram WebApp
-window.addEventListener('load', () => {
-  Telegram.WebApp.ready();
-
-  const user = Telegram.WebApp.initDataUnsafe?.user;
-  if (!user) {
-    document.getElementById('app').innerHTML = '<p>Waiting for Telegram WebApp...</p>';
+  if (!app) {
+    console.error('Element #app not found');
     return;
   }
 
-  renderApp();
-});
-
-function renderApp() {
-  const app = document.getElementById('app');
+  // Прелоадер
   app.innerHTML = `
-    <div class="logo">
-      <img src="/logo.png" alt="GGStars" style="width: 120px; margin: 20px auto;">
-    </div>
-
-    <div id="slider" style="overflow: hidden; width: 100%;">
-      <div id="slider-track" style="display: flex; transition: transform 0.5s ease;"></div>
-    </div>
-
-    <div class="buttons">
-      <button onclick="openBets()">Мої ставки</button>
-      <button onclick="openProfile()">Мій профіль</button>
-      <button onclick="openReferral()">Реферальна система</button>
-    </div>
+    <div id="preloader" style="text-align:center; padding: 50px; color: white;">Loading...</div>
   `;
 
-  loadMatches();
-}
+  try {
+    const matches = await getMatches();
 
-// Завантажити матчі
-async function loadMatches() {
-  const matches = await getMatches();
-  const track = document.getElementById('slider-track');
-  if (!track) return;
+    // Після завантаження даних — малюємо сторінку
+    app.innerHTML = `
+      `<div style="text-align: center; margin-top: 20px;"`>
+        <img src="/logo.png" alt="GGStars" style="width: 150px; margin-bottom: 20px;" />
+      </div>
 
-  matches.forEach(match => {
-    const matchCard = document.createElement('div');
-    matchCard.className = 'match-card';
-    matchCard.style.minWidth = '200px';
-    matchCard.style.margin = '0 10px';
-    matchCard.innerHTML = `
-      <div><strong>${match.name || 'Unknown Match'}</strong></div>
-      <div style="font-size: 12px;">${match.begin_at ? new Date(match.begin_at).toLocaleString() : 'No date'}</div>
+      <div id="matches-slider" style="display: flex; overflow-x: auto; gap: 10px; padding: 20px;">
+        ${matches.map(m => `
+          <div style="background: #333; padding: 15px; border-radius: 10px; min-width: 200px; color: white;">
+            <div><strong>${m.opponents?.[0]?.opponent?.name⠞⠺⠺⠺⠺⠟⠺⠺⠵⠵⠺⠟⠺⠟⠟⠞⠞⠵⠵⠵⠵⠺⠞⠟⠵⠵⠵⠟⠞⠞⠟⠞⠵⠵⠵⠞⠺⠟⠵⠵⠺⠟⠺⠵⠞⠟⠟⠵'TBD'}</strong></div>
+            <div>${m.begin_at ? new Date(m.begin_at).toLocaleString() : 'Date unknown'}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="position: fixed; bottom: 0; width: 100%; background: black; display: flex; justify-content: center; gap: 10px; padding: 10px;">
+        <button onclick="openBets()" style="padding: 10px 20px; background: yellow; border: none; border-radius: 5px;">Мої ставки</button>
+        <button onclick="openProfile()" style="padding: 10px 20px; background: yellow; border: none; border-radius: 5px;">Мій профіль</button>
+        <button onclick="openReferral()" style="padding: 10px 20px; background: yellow; border: none; border-radius: 5px;">Реферальна система</button>
+      </div>
     `;
-    track.appendChild(matchCard);
-  });
+  } catch (error) {
+    console.error('Error loading matches:', error);
+    app.innerHTML = <div style="color: red; text-align: center;">Помилка завантаження матчів</div>;
+  }
+};
 
-  startSlider();
-}
-
-// Автоскрол
-function startSlider() {
-  const track = document.getElementById('slider-track');
-  let scrollAmount = 0;
-  setInterval(() => {
-    scrollAmount += 1;
-    track.style.transform = `translateX(-${scrollAmount}px)`;
-    if (scrollAmount >= track.scrollWidth / 2) {
-      scrollAmount = 0;
-    }
-  }, 30);
-}
-
-// Кнопки
-window.openBets = function () {
+// Пусті функції для кнопок (додаси потім що потрібно)
+function openBets() {
   alert('Мої ставки');
-};
+}
 
-window.openProfile = function () {
+function openProfile() {
   alert('Мій профіль');
-};
+}
 
-window.openReferral = function () {
+function openReferral() {
   alert('Реферальна система');
-};
+}
