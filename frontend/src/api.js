@@ -1,20 +1,37 @@
-export async function fetchLiveMatches() {
-  const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
+const API_URL = import.meta.env.VITE_API_URL;
+const PANDA_SCORE_API_TOKEN = import.meta.env.VITE_PANDASCORE_API_TOKEN;
+
+export const fetchUserData = async (telegramData) => {
+  const response = await fetch(`${API_URL}/register`, {
+    method: 'POST',
     headers: {
-      Authorization: Bearer zsH2ngzJ0h2pQ0tu3PukEU_5Yp9ERc3lJgfWbdmnjsMqi8jIpJ0,
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify(telegramData),
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch matches');
+    throw new Error('Failed to save user.');
   }
 
-  const matches = await response.json();
-  return matches.map(m => ({
+  return await response.json();
+};
+
+export const fetchLiveMatches = async () => {
+  const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
+    headers: {
+      Authorization: Bearer ${PANDA_SCORE_API_TOKEN}
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch live matches.');
+  }
+
+  const data = await response.json();
+  return data.map(m => ({
     id: m.id,
-    team1: m.opponents[0]?.opponent?.name || 'TBD',
-    team2: m.opponents[1]?.opponent?.name || 'TBD',
-    time: new Date(m.begin_at).toLocaleString(),
-    status: m.status === 'running' ? 'LIVE' : 'UPCOMING',
+    teams: m.opponents?.map(o => o.opponent.name).join(' vs '),
+    time: m.begin_at
   }));
-}
+};
