@@ -1,64 +1,69 @@
 import { useEffect, useState } from 'react';
-import './style.css';
-
-const API_URL = 'https://ggstars.onrender.com/api';
-
-async function fetchMatches() {
-  const response = await fetch(`${API_URL}/matches`);
-  const data = await response.json();
-  return data;
-}
+import './style.css'; // Якщо є стилі
 
 function App() {
-  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [matches, setMatches] = useState([]);
 
   useEffect(() => {
-    fetchMatches()
-      .then(data => {
-        setMatches(data);
-        setLoading(false);
+    // Прелоадер 2 секунди
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    // Завантаження матчів
+    fetch('https://ggstars.onrender.com/api/matches')
+      .then((res) => res.json())
+      .then((data) => {
+        setMatches(data || []);
       })
-      .catch(error => {
-        console.error('Error fetching matches:', error);
-        setLoading(false);
+      .catch((error) => {
+        console.error('Failed to fetch matches:', error);
       });
+
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
     return (
       <div className="preloader">
-        Завантаження GGStars...
+        <h1>Завантаження...</h1>
       </div>
     );
   }
 
   return (
-    <div className="app">
-      <img src="/logo.png" alt="GGStars Logo" className="logo" />
-
-      <div className="matches-slider">
-        {matches.map((m, index) => (
-          <div key={index} className="match-card">
-            <div className="teams">
-              <strong>
-                {(m.opponents?.[0]?.opponent?.name || 'TBD')} vs {(m.opponents?.[1]?.opponent?.name || 'TBD')}
-              </strong>
-            </div>
-            <div className="time">
-              {m.begin_at ? new Date(m.begin_at).toLocaleString() : 'Дата невідома'}
-            </div>
-          </div>
-        ))}
+    <div className="container">
+      {/* Лого */}
+      <div className="logo">
+        <img src="/ggstarslogo.png" alt="GGStars" style={{ width: '150px', marginBottom: '20px' }} />
       </div>
 
+      {/* Живі матчі */}
+      <div className="matches-slider">
+        {matches.length > 0 ? (
+          matches.map((m, idx) => (
+            <div key={idx} className="match-card">
+              <strong>
+                {m.opponents?.[0]?.opponent?.name || 'TBD'} vs {m.opponents?.[1]?.opponent?.name || 'TBD'}
+              </strong>
+              <div>{m.begin_at ? new Date(m.begin_at).toLocaleString() : 'Дата невідома'}</div>
+            </div>
+          ))
+        ) : (
+          <div>Немає матчів</div>
+        )}
+      </div>
+
+      {/* Кнопки */}
       <div className="menu">
-        <button>Мої ставки</button>
-        <button>Мій профіль</button>
-        <button>Реферальна система</button>
+        <button onClick={() => alert('Мої ставки')}>Мої ставки</button>
+        <button onClick={() => alert('Мій профіль')}>Мій профіль</button>
+        <button onClick={() => alert('Реферальна система')}>Реферальна система</button>
       </div>
     </div>
   );
 }
 
 export default App;
+
