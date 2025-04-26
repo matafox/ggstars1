@@ -1,7 +1,7 @@
 import { getMatches } from './api';
 
 // Показати прелоадер
-document.getElementById('app').innerHTML = <div class="preloader">Loading...</div>;
+document.getElementById('app').innerHTML = '<div class="preloader">Loading...</div>';
 
 // Після завантаження Telegram WebApp
 window.addEventListener('load', () => {
