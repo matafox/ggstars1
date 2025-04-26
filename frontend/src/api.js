@@ -1,17 +1,18 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
-export async function saveUserData(userData) {
-  const response = await fetch(`${API_URL}/save-user`, {
-    method: 'POST',
+export async function getMatches() {
+  const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
     headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(userData)
+      Authorization: `Bearer ${import.meta.env.VITE_PANDASCORE_API_TOKEN}`
+    }
   });
 
   if (!response.ok) {
-    throw new Error('Failed to save user.');
+    throw new Error('Failed to fetch matches');
   }
 
-  return await response.json();
+  const data = await response.json();
+  return data.map(match => ({
+    team1: match.opponents?.[0]?.opponent?.name || "Unknown",
+    team2: match.opponents?.[1]?.opponent?.name || "Unknown",
+    time: match.begin_at
+  }));
 }
