@@ -18,7 +18,7 @@ window.onload = async () => {
 
     // Після завантаження даних — малюємо сторінку
     app.innerHTML = `
-      `<div style="text-align: center; margin-top: 20px;"`>
+      <div style="text-align: center; margin-top: 20px;">
         <img src="/logo.png" alt="GGStars" style="width: 150px; margin-bottom: 20px;" />
       </div>
 
