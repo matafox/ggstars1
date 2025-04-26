@@ -8,3 +8,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+function openReferral() {
+  alert("Ваше реферальне посилання тут: t.me/твійбот?start=referralcode");
+}
