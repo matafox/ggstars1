@@ -1,16 +1,20 @@
-
-export const getPing = async () => {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/ping`);
-  return await res.json();
-};
-
-export const saveUser = async (userData) => {
-  console.log("Sending user to backend:", userData);
-  await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-    method: 'POST',
+export async function fetchLiveMatches() {
+  const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
     headers: {
-      'Content-Type': 'application/json'
+      Authorization: Bearer zsH2ngzJ0h2pQ0tu3PukEU_5Yp9ERc3lJgfWbdmnjsMqi8jIpJ0,
     },
-    body: JSON.stringify(userData)
   });
-};
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch matches');
+  }
+
+  const matches = await response.json();
+  return matches.map(m => ({
+    id: m.id,
+    team1: m.opponents[0]?.opponent?.name || 'TBD',
+    team2: m.opponents[1]?.opponent?.name || 'TBD',
+    time: new Date(m.begin_at).toLocaleString(),
+    status: m.status === 'running' ? 'LIVE' : 'UPCOMING',
+  }));
+}
