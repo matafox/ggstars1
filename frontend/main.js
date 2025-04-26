@@ -1,4 +1,4 @@
-import { getMatches } from './api.js';
+import { getMatches } from './src/api.js';
 
 window.addEventListener('load', () => {
   setTimeout(() => {
