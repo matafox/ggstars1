@@ -1,16 +1,24 @@
 import { getMatches } from './api';
 
-window.addEventListener('load', async () => {
+async function loadMatches() {
+  const matchesContainer = document.getElementById('matches');
+  if (!matchesContainer) return;
+
   const matches = await getMatches();
-  
-  const matchesContainer = document.createElement('div');
-  matchesContainer.style.color = 'white';
+  matchesContainer.innerHTML = '';
 
   matches.forEach(match => {
-    const matchDiv = document.createElement('div');
-    matchDiv.textContent = `${match.name || 'No name'} — ${match.status}`;
-    matchesContainer.appendChild(matchDiv);
+    const matchCard = document.createElement('div');
+    matchCard.className = 'match-card';
+    matchCard.innerHTML = `
+      <div>${match.opponents ? match.opponents.map(o => o.name).join(' vs ') : 'Unknown Teams'}</div>
+      <div>${new Date(match.begin_at).toLocaleString() || 'No date'}</div>
+    `;
+    matchesContainer.appendChild(matchCard);
   });
+}
 
-  document.body.appendChild(matchesContainer);
+// Викликаємо після авторизації Telegram
+window.addEventListener('load', () => {
+  loadMatches();
 });
