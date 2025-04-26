@@ -1,13 +1,16 @@
+import { getMatches } from './api';
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
+window.addEventListener('load', async () => {
+  const matches = await getMatches();
+  
+  const matchesContainer = document.createElement('div');
+  matchesContainer.style.color = 'white';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-function openReferral() {
-  alert("Ваше реферальне посилання тут: t.me/твійбот?start=referralcode");
-}
+  matches.forEach(match => {
+    const matchDiv = document.createElement('div');
+    matchDiv.textContent = `${match.name || 'No name'} — ${match.status}`;
+    matchesContainer.appendChild(matchDiv);
+  });
+
+  document.body.appendChild(matchesContainer);
+});
