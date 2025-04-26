@@ -3,7 +3,7 @@ const PANDA_SCORE_API_TOKEN = "zsH2ngzJ0h2pQ0tu3PukEU_5Yp9ERc3lJgfWbdmnjsMqi8jIp
 export async function getLiveMatches() {
   const response = await fetch("https://api.pandascore.co/csgo/matches/upcoming", {
     headers: {
-      Authorization: Bearer ${PANDA_SCORE_API_TOKEN},
+      Authorization: Bearer ${VITE_PANDA_SCORE_API_TOKEN},
     },
   });
 
