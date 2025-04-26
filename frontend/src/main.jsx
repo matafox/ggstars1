@@ -36,7 +36,7 @@ function App() {
     <div className="container">
       {/* Лого */}
       <div className="logo">
-        <img src="/logo.png" alt="GGStars" style={{ width: '150px', marginBottom: '20px' }} />
+        <img src="/ggstarslogo.png" alt="GGStars" style={{ width: '150px', marginBottom: '20px' }} />
       </div>
 
       {/* Живі матчі */}
