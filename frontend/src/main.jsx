@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
+
+// Підключаємо глобальні стилі ще до того, як вмонтуємо App
 import './style.css';
+import './preloader.css';
+
+import App from './App';
 
 function App() {
   const [loading, setLoading] = useState(true);
