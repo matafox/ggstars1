@@ -49,12 +49,10 @@ app.get('/api/matches', async (req, res) => {
 app.post('/api/auth', async (req, res) => {
   try {
     const { initData } = req.body;
-
     if (!initData) {
       return res.status(400).json({ error: 'initData missing' });
     }
 
-    // Парсимо дані initData
     const params = new URLSearchParams(initData);
     const user = {
       id: params.get('user.id'),
@@ -74,14 +72,14 @@ app.post('/api/auth', async (req, res) => {
     );
 
     if (existingUser.rows.length === 0) {
-      // Створення нового юзера
-     await pool.query(
-      'INSERT INTO ggusers (username, token) VALUES ($1, $2) ON CONFLICT (username) DO NOTHING',
-      ['testuser', initData]
+      // Якщо нема — створити
+      await pool.query(
+        'INSERT INTO ggusers (telegram_id, username) VALUES ($1, $2)',
+        [user.id, user.username]
       );
     }
 
-    res.json({ success: true, user });
+    res.json({ success: true, user }); // <<< ОТУТ важливо повертаємо користувача
   } catch (error) {
     console.error('Authorization error:', error);
     res.status(500).json({ error: 'Server error' });
