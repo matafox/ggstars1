@@ -81,7 +81,7 @@ app.post('/api/auth', async (req, res) => {
       );
     }
 
-    res.json({ success: true });
+    res.json({ success: true, user });
   } catch (error) {
     console.error('Authorization error:', error);
     res.status(500).json({ error: 'Server error' });
