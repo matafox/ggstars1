@@ -49,6 +49,7 @@ app.get('/api/matches', async (req, res) => {
 app.post('/api/auth', async (req, res) => {
   try {
     const { initData } = req.body;
+
     if (!initData) {
       return res.status(400).json({ error: 'initData missing' });
     }
@@ -61,32 +62,29 @@ app.post('/api/auth', async (req, res) => {
     }
 
     const parsedUser = JSON.parse(rawUser);
+
     const user = {
       id: parsedUser.id,
-      first_name: parsedUser.first_name,
-      last_name: parsedUser.last_name,
-      username: parsedUser.username,
+      username: parsedUser.username || '',
+      first_name: parsedUser.first_name || '',
+      last_name: parsedUser.last_name || '',
+      is_admin: false, // завжди false на початку
     };
 
-    if (!user.id || !user.first_name) {
-      return res.status(400).json({ error: 'Invalid user data' });
-    }
-
-    const existingUser = await pool.query(
-      'SELECT * FROM ggusers WHERE telegram_id = $1',
-      [user.id]
-    );
+    // Перевіряємо чи юзер вже є
+    const existingUser = await pool.query('SELECT * FROM ggusers WHERE id = $1', [user.id]);
 
     if (existingUser.rows.length === 0) {
+      // Створюємо нового юзера
       await pool.query(
-        'INSERT INTO ggusers (telegram_id, first_name, last_name, username) VALUES ($1, $2, $3, $4)',
-        [user.id, user.first_name, user.last_name, user.username]
+        'INSERT INTO ggusers (id, username, first_name, last_name, is_admin) VALUES ($1, $2, $3, $4, $5)',
+        [user.id, user.username, user.first_name, user.last_name, user.is_admin]
       );
     }
 
     res.json({ success: true, user });
   } catch (error) {
-    console.error('Authorization error:', error);
+    console.error('Authorization error', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
