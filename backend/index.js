@@ -53,39 +53,38 @@ app.post('/api/auth', async (req, res) => {
       return res.status(400).json({ error: 'initData missing' });
     }
 
-const params = new URLSearchParams(initData);
-const rawUser = params.get('user');
+    const params = new URLSearchParams(initData);
+    const rawUser = params.get('user');
 
-if (!rawUser) {
-  return res.status(400).json({ error: 'No user in initData' });
-}
+    if (!rawUser) {
+      return res.status(400).json({ error: 'No user in initData' });
+    }
 
-const parsedUser = JSON.parse(rawUser);
-const user = {
-  id: parsedUser.id,
-  first_name: parsedUser.first_name,
-  last_name: parsedUser.last_name,
-  username: parsedUser.username,
-};
+    const parsedUser = JSON.parse(rawUser);
+    const user = {
+      id: parsedUser.id,
+      first_name: parsedUser.first_name,
+      last_name: parsedUser.last_name,
+      username: parsedUser.username,
+    };
+
     if (!user.id || !user.first_name) {
       return res.status(400).json({ error: 'Invalid user data' });
     }
 
-    // Перевірка чи юзер вже існує
     const existingUser = await pool.query(
       'SELECT * FROM ggusers WHERE telegram_id = $1',
       [user.id]
     );
 
     if (existingUser.rows.length === 0) {
-      // Якщо нема — створити
       await pool.query(
-        'INSERT INTO ggusers (telegram_id, username) VALUES ($1, $2)',
-        [user.id, user.username]
+        'INSERT INTO ggusers (telegram_id, first_name, last_name, username) VALUES ($1, $2, $3, $4)',
+        [user.id, user.first_name, user.last_name, user.username]
       );
     }
 
-    res.json({ success: true, user }); // <<< ОТУТ важливо повертаємо користувача
+    res.json({ success: true, user });
   } catch (error) {
     console.error('Authorization error:', error);
     res.status(500).json({ error: 'Server error' });
