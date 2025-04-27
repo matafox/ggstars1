@@ -6,7 +6,7 @@ bot.onText(/\/start/, (msg) => {
         [
           {
             text: '🚀 Відкрити GGStars',
-            web_app: { url: 'https://твій-сайт-на-Netlify' }
+            web_app: { url: 'https://jovial-alpaca-bcc007.netlify.app/' }
           }
         ]
       ]
