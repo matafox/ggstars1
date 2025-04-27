@@ -62,7 +62,12 @@ useEffect(() => {
       <div className="logo">
         <img src="/ggstarslogo.png" alt="GGStars" style={{ width: '150px', marginBottom: '20px' }} />
       </div>
-
+{/* Ім'я юзера */}
+    {user && (
+      <div className="welcome">
+        Привіт, {user.first_name}!
+      </div>
+    )}
       {/* Живі матчі */}
       <div className="matches-slider">
         {matches.length > 0 ? (
