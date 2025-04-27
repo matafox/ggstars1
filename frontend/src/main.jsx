@@ -26,7 +26,7 @@ useEffect(() => {
     .then((res) => res.json())
     .then((data) => {
       console.log('User authorized:', data);
-            if (data.user) {
+            if (data && data.user) {
         setUser(data.user); // зберігаємо юзера
       }
 
