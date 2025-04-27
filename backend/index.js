@@ -10,7 +10,9 @@ dotenv.config();
 const app = express();
 // Забираємо порт із середовища або за замовчуванням 10000
 const PORT = process.env.PORT || 10000;
-
+app.listen(port, () => {
+  console.log(`Backend is running on port ${port}`);
+});
 // Пул для NeonDB
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
