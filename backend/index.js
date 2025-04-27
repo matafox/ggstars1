@@ -9,7 +9,7 @@ dotenv.config();
 
 const app = express();
 // Забираємо порт із середовища або за замовчуванням 10000
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 10000;
 app.listen(port, () => {
   console.log(`Backend is running on port ${port}`);
 });
