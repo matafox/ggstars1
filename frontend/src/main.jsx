@@ -13,6 +13,7 @@ useEffect(() => {
 
   // Відправка Telegram даних для авторизації
   const initData = window.Telegram?.WebApp?.initData;
+  alert('initData: ' + initData);
   if (initData) {
     fetch('https://ggstars.onrender.com/api/auth', {
       method: 'POST',
