@@ -54,13 +54,19 @@ app.post('/api/auth', async (req, res) => {
     }
 
     const params = new URLSearchParams(initData);
-    const user = {
-      id: params.get('user.id'),
-      first_name: params.get('user.first_name'),
-      last_name: params.get('user.last_name'),
-      username: params.get('user.username'),
-    };
+const rawUser = params.get('user');
 
+if (!rawUser) {
+  return res.status(400).json({ error: 'No user in initData' });
+}
+
+const parsedUser = JSON.parse(rawUser);
+const user = {
+  id: parsedUser.id,
+  first_name: parsedUser.first_name,
+  last_name: parsedUser.last_name,
+  username: parsedUser.username,
+};
     if (!user.id || !user.first_name) {
       return res.status(400).json({ error: 'Invalid user data' });
     }
