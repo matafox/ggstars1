@@ -4,6 +4,7 @@ import './style.css'; // Якщо є стилі
 function App() {
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState([]);
+  const [user, setUser] = useState(null);
 
 useEffect(() => {
   // Прелоадер 2 секунди
