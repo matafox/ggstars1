@@ -1,14 +1,72 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { useEffect, useState } from 'react';
+import { getMatches } from './api';
 
-// Підключаємо стилі _до того_, як завантажиться App
-import './style.css';
+function App() {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-import App from './App';
+  useEffect(() => {
+    async function authorizeUser() {
+      try {
+        const initData = window.Telegram?.WebApp?.initData;
+        console.log('initData:', initData);
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+        if (initData) {
+          const response = await fetch('https://ggstars.onrender.com/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData }),
+          });
+          const data = await response.json();
+          console.log('Авторизація успішна:', data);
+        } else {
+          console.warn('Немає initData');
+        }
+      } catch (error) {
+        console.error('Помилка авторизації:', error);
+      }
+    }
+
+    async function loadMatches() {
+      try {
+        const data = await getMatches();
+        setMatches(data);
+      } catch (error) {
+        console.error('Помилка завантаження матчів:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    authorizeUser();
+    loadMatches();
+  }, []);
+
+  if (loading) {
+    return <div style={{ color: 'white', padding: '20px' }}>Завантаження...</div>;
+  }
+
+  return (
+    <div style={{ padding: '20px', backgroundColor: '#121212', minHeight: '100vh', color: 'white' }}>
+      <h1>Живі матчі</h1>
+      {matches.length > 0 ? (
+        matches.map((match, idx) => (
+          <div key={idx} style={{ marginBottom: '15px', background: '#1e1e1e', padding: '10px', borderRadius: '8px' }}>
+            <div><strong>{match.team1}</strong> vs <strong>{match.team2}</strong></div>
+            <small>{new Date(match.time).toLocaleString()}</small>
+          </div>
+        ))
+      ) : (
+        <div>Наразі немає матчів</div>
+      )}
+      
+      <footer style={{ position: 'fixed', bottom: '0', left: '0', right: '0', backgroundColor: '#1e1e1e', padding: '10px', display: 'flex', justifyContent: 'space-around' }}>
+        <button>Мої ставки</button>
+        <button>Мій профіль</button>
+        <button>Реферальна система</button>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
