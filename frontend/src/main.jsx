@@ -1,99 +1,78 @@
-import { useEffect, useState } from 'react';
-import './style.css'; // Якщо є стилі
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import './style.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState([]);
   const [user, setUser] = useState(null);
 
-useEffect(() => {
-  // Прелоадер 2 секунди
-  const timer = setTimeout(() => {
-    setLoading(false);
-  }, 2000);
-
-  // Відправка Telegram даних для авторизації
-  const initData = window.Telegram?.WebApp?.initData;
-  alert('initData: ' + initData);
-  if (initData) {
-    fetch('https://ggstars.onrender.com/api/auth', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ initData }),
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log('User authorized:', data);
-            if (data && data.user) {
-        setUser(data.user); // зберігаємо юзера
+  useEffect(() => {
+    // 1) Авторизація Telegram
+    (async () => {
+      const initData = window.Telegram?.WebApp?.initData;
+      if (initData) {
+        try {
+          const res = await fetch('https://ggstars.onrender.com/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData }),
+          });
+          const json = await res.json();
+          if (json.user) setUser(json.user);
+        } catch (e) {
+          console.error('Auth error', e);
+        }
+      } else {
+        console.warn('No initData (не через Telegram)');
       }
+    })();
 
-    })
-    .catch((error) => {
-      console.error('Authorization error:', error);
-    });
-  }
+    // 2) Завантаження матчів
+    (async () => {
+      try {
+        const res = await fetch('https://ggstars.onrender.com/api/matches');
+        const data = await res.json();
+        setMatches(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error('Fetch matches error', e);
+      }
+    })();
 
-  // Завантаження матчів
-  fetch('https://ggstars.onrender.com/api/matches')
-    .then((res) => res.json())
-    .then((data) => {
-      setMatches(data || []);
-    })
-    .catch((error) => {
-      console.error('Failed to fetch matches', error);
-    });
-
-  return () => clearTimeout(timer);
-}, []);
+    // 3) Прелоадер 2 секунди
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
-    return (
-      <div className="preloader">
-        <h1>Завантаження...</h1>
-      </div>
-    );
+    return <div className="preloader"><h1>Завантаження...</h1></div>;
   }
 
   return (
     <div className="container">
-      {/* Лого */}
       <div className="logo">
-        <img src="/ggstarslogo.png" alt="GGStars" style={{ width: '150px', marginBottom: '20px' }} />
+        <img src="/ggstarslogo.png" alt="GGStars" />
       </div>
-{/* Ім'я юзера */}
-    {user && (
-      <div className="welcome">
-        Привіт, {user.first_name}!
-      </div>
-    )}
-      {/* Живі матчі */}
+      {user && <div className="welcome">Привіт, {user.first_name}!</div>}
       <div className="matches-slider">
-        {matches.length > 0 ? (
-          matches.map((m, idx) => (
-            <div key={idx} className="match-card">
-              <strong>
-                {m.opponents?.[0]?.opponent?.name || 'TBD'} vs {m.opponents?.[1]?.opponent?.name || 'TBD'}
-              </strong>
-              <div>{m.begin_at ? new Date(m.begin_at).toLocaleString() : 'Дата невідома'}</div>
-            </div>
-          ))
-        ) : (
-          <div>Немає матчів</div>
-        )}
+        <h1>Живі матчі</h1>
+        {matches.length > 0 ? matches.map((m, i) => (
+          <div key={i} className="match-card">
+            <strong>
+              {m.opponents?.[0]?.opponent?.name || 'TBD'} vs {m.opponents?.[1]?.opponent?.name || 'TBD'}
+            </strong>
+            <div>{m.begin_at ? new Date(m.begin_at).toLocaleString() : '—'}</div>
+          </div>
+        )) : <div>Немає матчів</div>}
       </div>
-
-      {/* Кнопки */}
       <div className="menu">
-        <button onClick={() => alert('Мої ставки')}>Мої ставки</button>
-        <button onClick={() => alert('Мій профіль')}>Мій профіль</button>
-        <button onClick={() => alert('Реферальна система')}>Реферальна система</button>
+        <button>Мої ставки</button>
+        <button>Мій профіль</button>
+        <button>Реферальна система</button>
       </div>
     </div>
   );
 }
 
-export default App;
-
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
