@@ -1,87 +1,100 @@
-// backend/index.js
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import pkg from 'pg';
+import { Pool } from 'pg';
+import path from 'path';
 
 dotenv.config();
-const { Pool } = pkg;
 
 const app = express();
-const port = process.env.PORT || 10000;
+// Забираємо порт із середовища або за замовчуванням 10000
+const PORT = process.env.PORT || 10000;
 
-app.use(cors());
-app.use(express.json());
-
-// Підключення до Neon
+// Пул для NeonDB
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-// Токен для PandaScore (з .env: PANDASCORE_API_TOKEN=твій_токен)
-const PANDASCORE_API_TOKEN = process.env.PANDASCORE_API_TOKEN;
+app.use(cors());
+app.use(express.json());
 
-// --- Маршрут /api/matches ---
+// --- Статика фронтенду ---
+const frontendDist = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDist));
+
+// --- Маршрут отримання матчів ---
 app.get('/api/matches', async (req, res) => {
   try {
-    const response = await fetch(
-      'https://api.pandascore.co/csgo/matches/upcoming',
-      { headers: { Authorization: `Bearer ${PANDASCORE_API_TOKEN}` } }
-    );
+    const response = await fetch('https://api.pandascore.co/csgo/matches/upcoming', {
+      headers: { Authorization: `Bearer ${process.env.PANDASCORE_API_TOKEN}` }
+    });
     if (!response.ok) {
       return res.status(response.status).json({ error: 'Failed to fetch matches' });
     }
     const data = await response.json();
-    res.json(data); // повертаємо масив матчів
-  } catch (err) {
-    console.error('Error fetching matches:', err);
+    // за бажанням відфільтруйте/підготуйте data
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching matches:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// --- Маршрут /api/auth ---
+// --- Маршрут авторизації Telegram WebApp ---
 app.post('/api/auth', async (req, res) => {
   try {
     const { initData } = req.body;
-    if (!initData) return res.status(400).json({ error: 'No initData provided' });
+    if (!initData) {
+      return res.status(400).json({ error: 'initData missing' });
+    }
 
-    // Парсимо initData із Telegram WebApp
+    // initData — рядок виду "field1=...&field2=..."
     const params = new URLSearchParams(initData);
     const rawUser = params.get('user');
-    if (!rawUser) return res.status(400).json({ error: 'No user in initData' });
+    if (!rawUser) {
+      return res.status(400).json({ error: 'No user in initData' });
+    }
 
-    const parsed = JSON.parse(rawUser);
+    const parsedUser = JSON.parse(rawUser);
     const user = {
-      id: parsed.id,
-      username: parsed.username || '',
-      first_name: parsed.first_name || '',
-      last_name: parsed.last_name || '',
+      id: parsedUser.id,
+      first_name: parsedUser.first_name,
+      last_name: parsedUser.last_name,
+      username: parsedUser.username,
+      is_admin: false
     };
 
-    // Перевіряємо, чи є такий user.id
+    // Перевіряємо чи є такий у базі
     const { rows } = await pool.query(
-      'SELECT 1 FROM ggusers WHERE id = $1',
+      'SELECT * FROM ggusers WHERE id = $1',
       [user.id]
     );
+
     if (rows.length === 0) {
-      // Якщо нема — додаємо
+      // Створюємо нового
       await pool.query(
         `INSERT INTO ggusers (id, username, first_name, last_name, is_admin)
-         VALUES ($1, $2, $3, $4, false)`,
-        [user.id, user.username, user.first_name, user.last_name]
+         VALUES ($1,$2,$3,$4,$5)`,
+        [user.id, user.username, user.first_name, user.last_name, user.is_admin]
       );
     }
 
-    return res.json({ success: true, user });
-  } catch (err) {
-    console.error('Auth error:', err);
+    // Повертаємо юзера у фронтенд
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Authorization error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Старт сервера
-app.listen(port, () => {
-  console.log(`Backend running on port ${port}`);
+// --- Для SPA: всі інші запити віддаємо index.html ---
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
+// --- Старт сервера ---
+app.listen(PORT, () => {
+  console.log(`Backend is running on port ${PORT}`);
 });
