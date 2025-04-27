@@ -53,13 +53,6 @@ app.post('/api/auth', async (req, res) => {
       return res.status(400).json({ error: 'initData missing' });
     }
 
-    const params = new URLSearchParams(initData);
-const rawUser = params.get('user');
-
-if (!rawUser) {
-  return res.status(400).json({ error: 'No user in initData' });
-}
-
 const params = new URLSearchParams(initData);
 const rawUser = params.get('user');
 
