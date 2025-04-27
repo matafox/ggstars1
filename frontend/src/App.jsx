@@ -1,99 +1,64 @@
-import { useEffect, useState } from 'react'
-import { getMatches } from './api'
-import './style.css'
+import React, { useEffect, useState } from 'react'
+import { getMatches } from './api'   // див. пункт 3
+import './style.css'                // твій CSS для кнопок, прелоадера, лого
 
 function App() {
   const [loading, setLoading] = useState(true)
   const [matches, setMatches] = useState([])
   const [user, setUser] = useState(null)
 
-  // Прелоадер 2 секунди
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000)
-    return () => clearTimeout(timer)
-  }, [])
+    // 1) прелоадер на 2 секунди
+    setTimeout(() => setLoading(false), 2000)
 
-  // Авторизація + завантаження матчів
-  useEffect(() => {
-    async function authorize() {
-      const initData = window.Telegram?.WebApp?.initData
-      console.log('initData:', initData)
-      if (!initData) return
-
-      try {
-        const resp = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initData })
-        })
-        const result = await resp.json()
-        console.log('User authorized:', result)
-        if (result.success) {
-          setUser(result.user)
-        }
-      } catch (e) {
-        console.error('Authorization error:', e)
-      }
+    // 2) авторизація Telegram
+    const initData = window.Telegram?.WebApp?.initData
+    if (initData) {
+      fetch('https://GGSTARS_BACKEND/api/auth', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ initData })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setUser(d.user)
+        console.log('User:', d)
+      })
+      .catch(console.error)
+    } else {
+      console.warn('No initData from Telegram')
     }
 
-    async function loadMatches() {
-      try {
-        const data = await getMatches()
-        setMatches(data)
-      } catch (e) {
-        console.error('Failed to fetch matches:', e)
-      }
-    }
+    // 3) завантажити матчі
+    getMatches().then(setMatches).catch(console.error)
 
-    authorize()
-    loadMatches()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="preloader">
-        <h1>Завантаження…</h1>
-      </div>
-    )
-  }
+  if (loading) return <div className="preloader">Завантаження…</div>
 
   return (
-    <div className="container">
-      <div className="logo">
-        <img src="/ggstarslogo.png" alt="GGStars Logo" />
-      </div>
+    <div className="app-container">
+      <header>
+        <img src="/ggstarslogo.png" alt="GGStars" className="logo"/>
+        {user && <p className="welcome">Привіт, <strong>{user.first_name}</strong>!</p>}
+      </header>
 
-      {user && (
-        <div className="welcome">
-          Вітаємо, <strong>{user.first_name}</strong>!
-        </div>
-      )}
+      <section className="matches">
+        {matches.length>0 ? matches.map((m,i)=>(
+          <div key={i} className="match">
+            <strong>{m.opponents?.[0]?.opponent?.name || '–'}</strong>
+            vs
+            <strong>{m.opponents?.[1]?.opponent?.name || '–'}</strong>
+            <div className="time">{ new Date(m.begin_at).toLocaleString() }</div>
+          </div>
+        )) : <p>Немає матчів</p>}
+      </section>
 
-      <div className="matches-slider">
-        {matches.length > 0 ? (
-          matches.map((m, i) => (
-            <div key={i} className="match-card">
-              <strong>
-                {m.opponents?.[0]?.opponent?.name ?? 'TBD'} vs{' '}
-                {m.opponents?.[1]?.opponent?.name ?? 'TBD'}
-              </strong>
-              <div>
-                {m.begin_at
-                  ? new Date(m.begin_at).toLocaleString()
-                  : 'Дата невідома'}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div>Немає матчів</div>
-        )}
-      </div>
-
-      <div className="menu">
+      <nav className="menu">
         <button>Мої ставки</button>
         <button>Мій профіль</button>
         <button>Реферальна система</button>
-      </div>
+      </nav>
     </div>
   )
 }
