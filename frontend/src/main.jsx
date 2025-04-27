@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 
 // Підключаємо стилі _до того_, як завантажиться App
 import './style.css';
+import './preloader.css';
 
 import App from './App';
 
