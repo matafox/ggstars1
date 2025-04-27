@@ -25,6 +25,10 @@ useEffect(() => {
     .then((res) => res.json())
     .then((data) => {
       console.log('User authorized:', data);
+            if (data.user) {
+        setUser(data.user); // зберігаємо юзера
+      }
+
     })
     .catch((error) => {
       console.error('Authorization error:', error);
