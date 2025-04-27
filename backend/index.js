@@ -75,9 +75,9 @@ app.post('/api/auth', async (req, res) => {
 
     if (existingUser.rows.length === 0) {
       // Створення нового юзера
-      await pool.query(
-        'INSERT INTO ggusers (telegram_id, username, first_name, last_name) VALUES ($1, $2, $3, $4)',
-        [user.id, user.username, user.first_name, user.last_name]
+     await pool.query(
+      'INSERT INTO ggusers (username, token) VALUES ($1, $2) ON CONFLICT (username) DO NOTHING',
+      ['testuser', initData]
       );
     }
 
