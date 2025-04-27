@@ -4,6 +4,7 @@ import { getMatches } from './api';
 
 function App() {
   const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
 
 useEffect(() => {
   async function authorizeUser() {
@@ -26,7 +27,7 @@ useEffect(() => {
         console.warn('No initData available');
       }
     } catch (error) {
-      console.error('Authorization error', error);
+      console.error('Authorization error:', error);
     }
   }
 
@@ -39,8 +40,16 @@ useEffect(() => {
     }
   }
 
-  authorizeUser();
-  loadMatches();
+  authorizeUser(); // запуск авторизації
+  loadMatches();   // завантаження матчів
+
+  // Прелоадер на 2 секунди:
+  const timer = setTimeout(() => {
+    setLoading(false);  // через 2 секунди вимикаємо прелоадер
+  }, 2000);
+
+  // Очищення таймера, якщо компонент закриється
+  return () => clearTimeout(timer);
 }, []);
 
   return (
