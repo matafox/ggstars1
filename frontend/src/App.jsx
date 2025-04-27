@@ -4,17 +4,43 @@ import { getMatches } from './api';
 function App() {
   const [matches, setMatches] = useState([]);
 
-  useEffect(() => {
-    async function loadMatches() {
-      try {
-        const data = await getMatches();
-        setMatches(data);
-      } catch (error) {
-        console.error('Помилка завантаження матчів', error);
+useEffect(() => {
+  async function authorizeUser() {
+    try {
+      const initData = window.Telegram?.WebApp?.initData;
+      console.log('initData:', initData);
+
+      if (initData) {
+        const response = await fetch('https://ggstars.onrender.com/api/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ initData }),
+        });
+
+        const data = await response.json();
+        console.log('User authorized:', data);
+      } else {
+        console.warn('No initData available');
       }
+    } catch (error) {
+      console.error('Authorization error', error);
     }
-    loadMatches();
-  }, []);
+  }
+
+  async function loadMatches() {
+    try {
+      const data = await getMatches();
+      setMatches(data);
+    } catch (error) {
+      console.error('Помилка завантаження матчів', error);
+    }
+  }
+
+  authorizeUser();
+  loadMatches();
+}, []);
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#121212', minHeight: '100vh', color: 'white' }}>
