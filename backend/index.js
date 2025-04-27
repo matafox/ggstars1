@@ -72,6 +72,7 @@ app.post('/api/auth', async (req, res) => {
     const existingUser = await pool.query('SELECT * FROM ggusers WHERE id = $1', [user.id]);
 
     if (existingUser.rows.length === 0) {
+      console.log('Parsed user before insert:', user);
       await pool.query(
         'INSERT INTO ggusers (id, username, first_name, last_name, is_admin) VALUES ($1, $2, $3, $4, false)',
         [user.id, user.username, user.first_name, user.last_name]
