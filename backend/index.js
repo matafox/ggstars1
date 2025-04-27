@@ -49,6 +49,7 @@ app.get('/api/matches', async (req, res) => {
 app.post('/api/auth', async (req, res) => {
   try {
     const { initData } = req.body;
+    console.log('Received initData:', initData);
     if (!initData) {
       return res.status(400).json({ error: 'No initData provided' });
     }
