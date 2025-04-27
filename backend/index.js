@@ -45,6 +45,49 @@ app.get('/api/matches', async (req, res) => {
   }
 });
 
+// Маршрут для авторизації користувача
+app.post('/api/auth', async (req, res) => {
+  try {
+    const { initData } = req.body;
+
+    if (!initData) {
+      return res.status(400).json({ error: 'initData missing' });
+    }
+
+    // Парсимо дані initData
+    const params = new URLSearchParams(initData);
+    const user = {
+      id: params.get('user.id'),
+      first_name: params.get('user.first_name'),
+      last_name: params.get('user.last_name'),
+      username: params.get('user.username'),
+    };
+
+    if (!user.id || !user.first_name) {
+      return res.status(400).json({ error: 'Invalid user data' });
+    }
+
+    // Перевірка чи юзер вже існує
+    const existingUser = await pool.query(
+      'SELECT * FROM ggusers WHERE telegram_id = $1',
+      [user.id]
+    );
+
+    if (existingUser.rows.length === 0) {
+      // Створення нового юзера
+      await pool.query(
+        'INSERT INTO ggusers (telegram_id, username, first_name, last_name) VALUES ($1, $2, $3, $4)',
+        [user.id, user.username, user.first_name, user.last_name]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Authorization error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Запуск сервера
 app.listen(port, () => {
   console.log(`Backend is running on port ${port}`);
