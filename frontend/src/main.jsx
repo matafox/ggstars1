@@ -5,24 +5,43 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState([]);
 
-  useEffect(() => {
-    // Прелоадер 2 секунди
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+useEffect(() => {
+  // Прелоадер 2 секунди
+  const timer = setTimeout(() => {
+    setLoading(false);
+  }, 2000);
 
-    // Завантаження матчів
-    fetch('https://ggstars.onrender.com/api/matches')
-      .then((res) => res.json())
-      .then((data) => {
-        setMatches(data || []);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch matches:', error);
-      });
+  // Відправка Telegram даних для авторизації
+  const initData = window.Telegram?.WebApp?.initData;
+  if (initData) {
+    fetch('https://ggstars.onrender.com/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ initData }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('User authorized:', data);
+    })
+    .catch((error) => {
+      console.error('Authorization error:', error);
+    });
+  }
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Завантаження матчів
+  fetch('https://ggstars.onrender.com/api/matches')
+    .then((res) => res.json())
+    .then((data) => {
+      setMatches(data || []);
+    })
+    .catch((error) => {
+      console.error('Failed to fetch matches', error);
+    });
+
+  return () => clearTimeout(timer);
+}, []);
 
   if (loading) {
     return (
