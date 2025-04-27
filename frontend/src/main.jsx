@@ -7,10 +7,7 @@ import './preloader.css';
 
 import App from './App';
 
-function App() {
-  const [loading, setLoading] = useState(true);
-  const [matches, setMatches] = useState([]);
-  const [user, setUser] = useState(null);
+
 
   useEffect(() => {
     // 1) Авторизація Telegram
