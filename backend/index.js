@@ -59,13 +59,14 @@ app.post('/api/auth', async (req, res) => {
       return res.status(400).json({ error: 'No user in initData' });
     }
 
+    
     const parsedUser = JSON.parse(rawUser);
     const user = {
-      id: parsedUser.id,
+      telegram_id: parsedUser.id,        // використовуємо telegram_id як PK
+      username: parsedUser.username || '',
       first_name: parsedUser.first_name,
-      last_name: parsedUser.last_name,
-      username: parsedUser.username,
-      is_admin: false
+      last_name: parsedUser.last_name || '',
+      is_admin: false                      // за замовчуванням
     };
 
     // Перевіряємо чи є такий у базі
