@@ -9,10 +9,14 @@ bot.onText(/\/start/, (msg) => {
     reply_markup: {
       inline_keyboard: [
         [
-          {
-            text: '🚀 Відкрити GGStars',
-            web_app: { url: 'https://jovial-alpaca-bcc007.netlify.app/' } // заміни на свій домен!
-          }
+          { text: '🚀 Відкрити GGStars', web_app: { url: 'https://твій-фронтенд-домен.com' } }
+        ],
+        [
+          { text: '📄 Мої ставки', callback_data: 'my_bets' },
+          { text: '👤 Мій профіль', callback_data: 'my_profile' }
+        ],
+        [
+          { text: '🎁 Реферальна система', callback_data: 'referral_system' }
         ]
       ]
     }
