@@ -76,12 +76,15 @@ app.post('/api/auth', async (req, res) => {
     );
 
     if (rows.length === 0) {
-      // Створюємо нового
-      await pool.query(
-        `INSERT INTO ggusers (id, username, first_name, last_name, is_admin)
-         VALUES ($1,$2,$3,$4,$5)`,
-        [user.id, user.username, user.first_name, user.last_name, user.is_admin]
-      );
+      // Вставка в Neon (таблиця ggusers)
+    await pool.query(
+      `INSERT INTO ggusers (telegram_id, username, first_name, last_name, is_admin)
+       VALUES ($1,$2,$3,$4,$5)
+       ON CONFLICT (telegram_id) DO NOTHING`,
+      [user.telegram_id, user.username, user.first_name, user.last_name, user.is_admin]
+    );
+
+ 
     }
 
     // Повертаємо юзера у фронтенд
